@@ -1,4 +1,4 @@
-Basisc scaffold to run a webpack project with pug structure.
+Basisc scaffold to run a webpack project with pug structure and three.js
 Ready to handle ES6, images, fonts, scss.
 
 **Scripts:**
