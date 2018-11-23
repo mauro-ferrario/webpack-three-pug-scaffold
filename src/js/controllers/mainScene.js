@@ -2,8 +2,8 @@ import ThreeBase, {SceneUI} from "../libs/mauroferrario/ThreeBase"
 import * as THREE from "three";
 
 const CustomUI = class extends SceneUI{
-  constructor(){
-      super();
+  constructor(threeBase){
+      super(threeBase);
   }
 
   addParameters(){

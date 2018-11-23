@@ -5,7 +5,8 @@ import dat from "../dataarts/dat.gui.min";
 import Stats from "../mrdoob/stats.js";
 
 export class SceneUI {
-  constructor(){
+  constructor(threeBase){
+    this.threeBase = threeBase;
     this.addParameters();
   }
 
@@ -19,21 +20,20 @@ export class SceneUI {
 }
 
 export default class ThreeBase{
-    constructor(){
-    this.setupScene();
-    this.setupVariables();
-    this.setupRender();
-    this.setup();
-    this.setupCamera();
-    this.setupLight();
-    this.addStats();
-    this.setupGUI();
-    this.animate();
-    document.body.appendChild( this.renderer.domElement );
-    window.addEventListener( 'resize', this.onWindowResize.bind(this), false );
-    document.addEventListener( 'mousemove', this.onDocumentMouseMove.bind(this), false );
-    document.addEventListener( 'click', this.onDocumentClick.bind(this), false );
-    this.onWindowResize();
+    constructor(showGui = true){
+      this.setup();
+      this.setupScene();
+      this.setupVariables();
+      this.setupRender();
+      this.setupCamera();
+      this.setupLight();
+      this.setupGUI(SceneUI, showGui);
+      this.animate();
+      document.body.appendChild( this.renderer.domElement );
+      window.addEventListener( 'resize', this.onWindowResize.bind(this), false );
+      document.addEventListener( 'mousemove', this.onDocumentMouseMove.bind(this), false );
+      document.addEventListener( 'click', this.onDocumentClick.bind(this), false );
+      this.onWindowResize();
   }
 
   setup(){
@@ -41,15 +41,16 @@ export default class ThreeBase{
     this.mouse = new THREE.Vector2();
     this.onMouseClickFunction;
     this.onMouseMoveFunction;
+    this.interactiveObjects = [];
   }
 
   setupVariables(){
 
   }
 
-  setupGUI(CustomUiClass){
+  setupGUI(CustomUiClass, showGui = true){
     this.gui = new dat.GUI();
-    this.ui = new CustomUiClass();
+    this.ui = new CustomUiClass(this);
     const lights = this.gui.addFolder('Lights')
     const directionalLight = this.gui.addFolder('Directional light')
     lights.add(this.ui, "ambientLightVisible");
@@ -57,6 +58,10 @@ export default class ThreeBase{
     directionalLight.add(this.ui, "shadowLightPosX", -300, 300);
     directionalLight.add(this.ui, "shadowLightPosY", -300, 300);
     directionalLight.add(this.ui, "shadowLightPosZ", -300, 300);
+    if(!showGui)
+      this.gui.__proto__.constructor.toggleHide();
+    else
+     this.addStats();
   }
 
   setupScene()
@@ -166,7 +171,7 @@ export default class ThreeBase{
 
   onDocumentMouseMove( event )
   {
-    if(this.onMouseMoveFunction || this.onMouseOverFunction)
+    if(this.onMouseMoveFunction || this.onMouseOverFunction || this.onMouseClickFunction)
       this.saveMousePos(event);
     if(this.onMouseMoveFunction)
       this.checkOver();
@@ -176,13 +181,19 @@ export default class ThreeBase{
     event.preventDefault();
     this.mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
     this.mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+
   }
 
   onDocumentClick( event )
   {
+    event.preventDefault();
     if(this.onMouseClickFunction){
-      this.checkOver(this.cubes, "click");
+      this.checkOver(this.interactiveObjects, "click");
     }
+  }
+
+  addInteractiveObject(obj){
+    this.interactiveObjects.push(obj);
   }
 
   checkOver(toCheck, event)
@@ -202,5 +213,9 @@ export default class ThreeBase{
     this.stats = new Stats();
     this.stats.showPanel(0);
     document.body.appendChild( this.stats.dom );
+  }
+
+  showCamereInfo(){
+    console.log(this.camera);
   }
 }
